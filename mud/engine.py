@@ -33,8 +33,8 @@ class MUDEngine(Engine):
     """
     The singleton MUD engine class.
     """
-    def poll(self):
-        Engine.poll(self)
+    def poll(self, poll_timeout):
+        Engine.poll(self, poll_timeout)
         
         store.commit()
 

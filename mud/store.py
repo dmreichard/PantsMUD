@@ -25,7 +25,7 @@ import os
 import sqlite3
 import UserDict
 
-from pants.publisher import publisher
+from mud.publisher import publisher
 
 from mud.shared import log
 

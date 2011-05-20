@@ -25,6 +25,7 @@ from mud.engine import mudengine
 from mud.network import MUDConnection, MUDServer
 from mud.object import Object, Storable
 from mud.store import store
+from mud.publisher import publisher
 
 
 ###############################################################################
@@ -37,4 +38,5 @@ __all__ = [
     "MUDConnection", "MUDServer",
     "Object", "Storable",
     "store",
+    "publisher",
     ]
