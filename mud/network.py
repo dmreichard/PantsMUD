@@ -22,7 +22,7 @@
 
 from mud.publisher import publisher
 
-from mud.protocol.telnet import TelnetConnection, TelnetServer
+from pants.contrib.telnet import TelnetConnection, TelnetServer
 
 
 ###############################################################################

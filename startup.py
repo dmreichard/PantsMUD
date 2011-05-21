@@ -22,7 +22,7 @@
 
 from pants import *
 from mud import *
-from pants.contrib import telnet
+from mud import MUDServer
 
 import log
 
@@ -36,7 +36,7 @@ if __name__ == "__main__":
     store.connect("pantsmud.db")
     
     # Create our servers.
-    t = telnet.TelnetServer()
+    t = MUDServer()
     t.listen(port=4000)
     
     # Start the engine.
