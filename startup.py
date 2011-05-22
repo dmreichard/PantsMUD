@@ -20,7 +20,7 @@
 # Imports
 ###############################################################################
 
-from pants import *
+from pants import engine, callback
 from mud import *
 from mud import MUDServer
 
@@ -38,6 +38,9 @@ if __name__ == "__main__":
     # Create our servers.
     t = MUDServer()
     t.listen(port=4000)
-    
+
+    # Start storage auto-commit callback.
+    callback(store.commit)
+ 
     # Start the engine.
-    mudengine.start()
+    engine.start()
