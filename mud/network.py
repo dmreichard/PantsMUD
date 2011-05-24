@@ -35,20 +35,18 @@ class MUDConnection(TelnetConnection):
         
         self.line_inbuf = []
     
-    def handle_connect(self):
+    def on_connect(self):
         publisher.publish("mud.connection.connect", self)
     
-    def handle_read(self, data):
-        TelnetConnection.handle_read(self, data.replace('\r', ''))
-        
-        while '\n' in self.inbuf:
-            line, self.inbuf = self.inbuf.split('\n', 1)
+    def on_telnet_data(self, data):
+        while '\n' in data:
+            line, data = data.split('\n', 1)
             
             self.line_inbuf.append(line)
         
         publisher.publish("mud.connection.read", self)
     
-    def handle_close(self):
+    def on_close(self):
         publisher.publish("mud.connection.close", self)
 
 
