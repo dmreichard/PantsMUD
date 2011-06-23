@@ -1,6 +1,6 @@
 ###############################################################################
 #
-# Copyright 2011 Chris Davis
+# Copyright 2011 Chris Davis and David Reichard
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@
 ###############################################################################
 
 from mud.publisher import publisher
+from mud.state import State
 
 from pants.contrib.telnet import TelnetConnection, TelnetServer
 
@@ -34,6 +35,7 @@ class MUDConnection(TelnetConnection):
         TelnetConnection.__init__(self, server, socket)
         
         self.line_inbuf = []
+        self.state_stack = []
     
     def on_connect(self):
         publisher.publish("mud.connection.connect", self)
@@ -44,11 +46,35 @@ class MUDConnection(TelnetConnection):
             
             self.line_inbuf.append(line)
         
-        publisher.publish("mud.connection.read", self)
+        try:
+            while len(self.line_inbuf) > 0:
+                self.state_stack[-1].on_readline(self.line_inbuf.pop())
+        except IndexError:  # No state handler on the state stack.
+                            # Do nothing, and preserve line buffer.
+            return None
     
     def on_close(self):
         publisher.publish("mud.connection.close", self)
+        
+    def push_state(self, state):
+        self.state_stack.push(state)
+    
+    def pop_state(self):
+        try:
+            return_value = self.state_stack.pop()
+        except IndexError:  # No state handler on the state stack to pop.
+            return None
+        return return_value
 
+    def replace_state(self, state):
+        try:
+            return_value = self.state_stack[-1]
+            self.state_stack[-1] = state
+        except IndexError:  # No state handler currently on state stack.
+                            # Push the state instead of replace.
+            self.push_state(state)
+            return None
+        return return_value
 
 ###############################################################################
 # MUDServer Class
