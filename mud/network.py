@@ -40,7 +40,7 @@ class MUDConnection(TelnetConnection):
     def on_connect(self):
         publisher.publish("mud.connection.connect", self)
     
-    def on_telnet_data(self, data):
+    def on_read(self, data):
         while '\n' in data:
             line, data = data.split('\n', 1)
             
@@ -53,27 +53,36 @@ class MUDConnection(TelnetConnection):
                             # Do nothing, and preserve line buffer.
             return None
     
+    def on_write(self):
+        try:
+            self.state_stack[-1].on_write()
+        except IndexError: # No state handler on the state stack.
+            return None
+        
     def on_close(self):
         publisher.publish("mud.connection.close", self)
         
     def push_state(self, state):
-        self.state_stack.push(state)
+        try:
+            self.state_stack[-1].on_losefocus()
+        except:
+            pass
+        self.state_stack.append(state(self))
+        self.state_stack[-1].on_gainfocus()
     
     def pop_state(self):
         try:
             return_value = self.state_stack.pop()
+            return_value.on_losefocus()
+            if len(self.state_stack) > 0:
+                self.state_stack[-1].on_gainfocus()
         except IndexError:  # No state handler on the state stack to pop.
             return None
         return return_value
 
     def replace_state(self, state):
-        try:
-            return_value = self.state_stack[-1]
-            self.state_stack[-1] = state
-        except IndexError:  # No state handler currently on state stack.
-                            # Push the state instead of replace.
-            self.push_state(state)
-            return None
+        return_value = self.pop_state()
+        self.push_state(state)
         return return_value
 
 ###############################################################################
