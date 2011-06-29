@@ -41,23 +41,16 @@ class MUDConnection(TelnetConnection):
         publisher.publish("mud.connection.connect", self)
     
     def on_read(self, data):
-        while '\n' in data:
-            line, data = data.split('\n', 1)
-            
-            self.line_inbuf.append(line)
-        
         try:
-            while len(self.line_inbuf) > 0:
-                self.state_stack[-1].on_readline(self.line_inbuf.pop())
+            self.state_stack[-1].on_read(data.rstrip('\r\n'))
         except IndexError:  # No state handler on the state stack.
-                            # Do nothing, and preserve line buffer.
-            return None
+            pass
     
     def on_write(self):
         try:
             self.state_stack[-1].on_write()
         except IndexError: # No state handler on the state stack.
-            return None
+            pass
         
     def on_close(self):
         publisher.publish("mud.connection.close", self)

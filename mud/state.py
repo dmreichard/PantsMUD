@@ -8,7 +8,7 @@ class State(object):
         pass
     def on_losefocus(self):
         pass
-    def on_readline(self, line):
+    def on_read(self, data):
         pass
     def on_write(self):
         pass
